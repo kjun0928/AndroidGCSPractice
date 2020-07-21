@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.naver.maps.map.MapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="-25dp" />
+
+    <LinearLayout
+        android:id="@+id/menu"
+        android:layout_width="110dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/MapLayouts"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/BasicMap"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:onClick="BasicMap"
+            android:text="일반지도" />
+
+        <Button
+            android:id="@+id/NaviMap"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:onClick="NaviMap"
+            android:text="차량용지도" />
+
+        <Button
+            android:id="@+id/SatelliteMap"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:onClick="SatelliteMap"
+            android:text="위성지도" />
+
+        <Button
+            android:id="@+id/HybridMap"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:onClick="HybridMap"
+            android:text="종합위성지도" />
+
+        <Button
+            android:id="@+id/TerrainMap"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:onClick="TerrainMap"
+            android:text="지형지도" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/MapLayouts"
+        android:layout_width="110dp"
+        android:layout_height="wrap_content"
+        android:onClick="MapType"
+        android:text="일반지도"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="25dp"
+        android:background="#ffffff"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/map">
+
+        <TextView
+            android:id="@+id/textView11"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="TextView"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <Spinner
+            android:id="@+id/modeSelect"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_column="1"
+            android:layout_below="@+id/connectionTypeLabel"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/btnConnect"
+            android:spinnerMode="dropdown" />
+
+        <TextView
+            android:id="@+id/altitudeValueTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="고도 0m"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:id="@+id/speedValueTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="속도 0m/s"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:id="@+id/distanceValueTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="거리 0m"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="TextView"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnConnect"
+        android:layout_width="120dp"
+        android:layout_height="40dp"
+        android:onClick="onBtnConnectTap"
+        android:text="Connect"
+        app:layout_constraintBottom_toTopOf="@+id/selectConnectionType"
+        app:layout_constraintEnd_toStartOf="@+id/menu" />
+
+    <Spinner
+        android:id="@+id/selectConnectionType"
+        android:layout_width="120dp"
+        android:layout_height="40dp"
+        android:entries="@array/drone_connection_types"
+        android:spinnerMode="dropdown"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/MapLayouts" />
+
+</android.support.constraint.ConstraintLayout>
