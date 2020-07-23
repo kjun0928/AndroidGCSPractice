@@ -70,19 +70,22 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="25dp"
-        android:background="#ffffff"
+        android:background="#80000000"
         android:orientation="horizontal"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/map">
 
         <TextView
-            android:id="@+id/textView11"
+            android:id="@+id/batteryVoltageValueTextView"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
             android:layout_weight="1"
-            android:text="TextView"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:text="전압 0V"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/background_light" />
 
         <Spinner
             android:id="@+id/modeSelect"
@@ -93,6 +96,7 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true"
             android:layout_toLeftOf="@+id/btnConnect"
+            android:textColor="@android:color/background_light"
             android:spinnerMode="dropdown" />
 
         <TextView
@@ -101,7 +105,8 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="고도 0m"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/background_light" />
 
         <TextView
             android:id="@+id/speedValueTextView"
@@ -109,23 +114,26 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="속도 0m/s"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/background_light" />
 
         <TextView
-            android:id="@+id/distanceValueTextView"
+            android:id="@+id/yawValueTextView"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="거리 0m"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:text="Yaw 0deg"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/background_light" />
 
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/numberofSatellitesValueTextView"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="TextView"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:text="위성 0"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/background_light" />
     </LinearLayout>
 
     <Button
@@ -141,6 +149,7 @@
         android:id="@+id/selectConnectionType"
         android:layout_width="120dp"
         android:layout_height="40dp"
+        android:background="@android:color/background_light"
         android:entries="@array/drone_connection_types"
         android:spinnerMode="dropdown"
         app:layout_constraintBottom_toBottomOf="parent"

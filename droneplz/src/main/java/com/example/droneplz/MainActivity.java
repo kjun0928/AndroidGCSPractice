@@ -49,6 +49,8 @@ import com.o3dr.services.android.lib.drone.companion.solo.SoloState;
 import com.o3dr.services.android.lib.drone.connection.ConnectionParameter;
 import com.o3dr.services.android.lib.drone.connection.ConnectionType;
 import com.o3dr.services.android.lib.drone.property.Altitude;
+import com.o3dr.services.android.lib.drone.property.Attitude;
+import com.o3dr.services.android.lib.drone.property.Battery;
 import com.o3dr.services.android.lib.drone.property.Gps;
 import com.o3dr.services.android.lib.drone.property.Home;
 import com.o3dr.services.android.lib.drone.property.Speed;
@@ -58,11 +60,15 @@ import com.o3dr.services.android.lib.drone.property.VehicleMode;
 import com.o3dr.services.android.lib.gcs.link.LinkConnectionStatus;
 import com.o3dr.services.android.lib.model.AbstractCommandListener;
 import com.o3dr.services.android.lib.model.SimpleCommandListener;
+import com.o3dr.services.android.lib.drone.mission.item.command.YawCondition;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.o3dr.services.android.lib.drone.attribute.AttributeType.BATTERY;
+
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, DroneListener, TowerListener, LinkListener {
+
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private Drone drone;
@@ -244,8 +250,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 updateAltitude();                                           //고도 업데이트
                 break;
 
+            case AttributeEvent.BATTERY_UPDATED:
+                updateBatteryVolt();                                        //전압 업데이트
+                break;
+/*
             case AttributeEvent.HOME_UPDATED:
                 updateDistanceFromHome();                                       //거리 업데이트
+                break;
+*/
+            case AttributeEvent.ATTITUDE_UPDATED:
+                updateYaw();                                            //Yaw 업데이트
+                break;
+
+            case AttributeEvent.GPS_COUNT:
+                updateNumberOfSatellites();                                         //위성 업데이트
                 break;
 
             default:
@@ -291,10 +309,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
+    protected void updateBatteryVolt(){
+        TextView voltTextView = (TextView)findViewById(R.id.batteryVoltageValueTextView);
+        Battery droneVolt = this.drone.getAttribute(BATTERY);
+        Log.d("MYLOG","베터리 변화 : " + droneVolt.getBatteryVoltage());
+        voltTextView.setText("전압" + String.format(" " + droneVolt.getBatteryVoltage()+"V"));
+    }
+
     protected void updateSpeed() {
         TextView speedTextView = (TextView) findViewById(R.id.speedValueTextView);
         Speed droneSpeed = this.drone.getAttribute(AttributeType.SPEED);
         speedTextView.setText("속도" + String.format("%3.1f", droneSpeed.getGroundSpeed()) + "m/s");
+    }
+
+    protected void updateYaw() {
+        TextView yawTextView = (TextView)findViewById(R.id.yawValueTextView);
+        Attitude droneyaw = this.drone.getAttribute(AttributeType.ATTITUDE);
+        Log.d("MYLOG","yaw : " + droneyaw.getYaw());
+        yawTextView.setText("Yaw" + String.format("%3.1f", droneyaw.getYaw()) + "deg");
     }
 
     protected void updateAltitude() {
@@ -303,6 +335,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         altitudeTextView.setText("고도" + String.format("%3.1f", droneAltitude.getAltitude()) + "m");
     }
 
+    protected void updateNumberOfSatellites() {
+        TextView numberOfSatellitesTextView = (TextView)findViewById(R.id.numberofSatellitesValueTextView);
+        Gps droneNumberOfSatellites = this.drone.getAttribute(AttributeType.GPS);
+        Log.d("MYLOG", "위성 수 변화 : " + droneNumberOfSatellites.getSatellitesCount());
+        numberOfSatellitesTextView.setText("위성" + String.format("%d", droneNumberOfSatellites.getSatellitesCount()));
+    }
+/*
     protected void updateDistanceFromHome() {
         TextView distanceTextView = (TextView) findViewById(R.id.distanceValueTextView);
         Altitude droneAltitude = this.drone.getAttribute(AttributeType.ALTITUDE);
@@ -320,9 +359,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             distanceFromHome = 0;
         }
 
-        distanceTextView.setText(String.format("%3.1f", distanceFromHome) + "m");
+        distanceTextView.setText("거리" + String.format("%3.1f", distanceFromHome) + "m");
     }
-
+*/
     protected void alertUser(String message) {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
         Log.d(TAG, message);
