@@ -1,6 +1,7 @@
 package com.example.droneplz;
 
 import android.content.Context;
+import android.graphics.PointF;
 import android.graphics.SurfaceTexture;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -75,6 +76,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private int droneType = Type.TYPE_UNKNOWN;
     private ControlTower controlTower;
     private final Handler handler = new Handler();
+    private LinearLayout armingbtn ;
+    private boolean connectDrone = false;
 
 
     private static final int DEFAULT_UDP_PORT = 14550;
@@ -111,6 +114,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             fm.beginTransaction().add(R.id.map, mapFragment).commit();
         }
 
+        if(!connectDrone) {
+            armingbtn = (LinearLayout)findViewById(R.id.connectmenu) ;
+            armingbtn.setVisibility(View.INVISIBLE);
+        }
+
         mapFragment.getMapAsync((OnMapReadyCallback) this);
         linemenu = findViewById(R.id.menu);
         linemenu.setVisibility(View.INVISIBLE);
@@ -127,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // Do nothing
             }
         });
+
+
 
 
 
@@ -195,8 +205,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Button connectButton = (Button) findViewById(R.id.btnConnect);
         if (isConnected) {
             connectButton.setText("Disconnect");
+            armingbtn.setVisibility(View.INVISIBLE);
         } else {
             connectButton.setText("Connect");
+            armingbtn.setVisibility(View.VISIBLE);
         }
     }
 
@@ -214,19 +226,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             case AttributeEvent.STATE_CONNECTED:
                 alertUser("Drone Connected");
                 updateConnectedButton(this.drone.isConnected());
-                //updateArmButton();
+                updateArmButton();
                 checkSoloState();
                 break;
 
             case AttributeEvent.STATE_DISCONNECTED:
                 alertUser("Drone Disconnected");
                 updateConnectedButton(this.drone.isConnected());
-                //updateArmButton();
+                updateArmButton();
                 break;
 
             case AttributeEvent.STATE_UPDATED:
             case AttributeEvent.STATE_ARMING:
-                //updateArmButton();
+                updateArmButton();
                 break;
 
             case AttributeEvent.TYPE_UPDATED:
@@ -265,12 +277,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             case AttributeEvent.GPS_COUNT:
                 updateNumberOfSatellites();                                         //위성 업데이트
                 break;
-
+/*
+            case AttributeEvent.GPS_POSITION:
+                updateDronePosition();                                         //드론위치 업데이트
+                break;
+*/
             default:
                 // Log.i("DRONE_EVENT", event); //Uncomment to see events from the drone
                 break;
         }
     }
+
 
     public void onBtnConnectTap(View view) {
         if (this.drone.isConnected()) {
@@ -286,6 +303,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             this.drone.connect(connectionParams);
         }
 
+    }
+
+    public void btn_event(View v){
+        switch(v.getId()){
+            case R.id.btnConnect:
+                onBtnConnectTap(v);
+                break;
+            case R.id.btnarm:
+                onArmButtonTap();
+                break;
+
+        }
     }
 
     public void onFlightModeSelected(View view) {
@@ -308,6 +337,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
     }
+
+/*
+    private void updateDronePosition(@NonNull LatLng coord) {
+        Marker marker = new Marker();
+        marker.setPosition(coord);
+        marker.setMap(myMap);
+    }
+*/
 
     protected void updateBatteryVolt(){
         TextView voltTextView = (TextView)findViewById(R.id.batteryVoltageValueTextView);
@@ -424,5 +461,81 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onTowerDisconnected() {
         alertUser("DroneKit-Android Interrupted");
+    }
+
+    protected void updateArmButton() {
+        State vehicleState = this.drone.getAttribute(AttributeType.STATE);
+        Button armButton = (Button) findViewById(R.id.btnarm);
+
+        if (!this.drone.isConnected()) {
+            armingbtn.setVisibility(View.INVISIBLE);
+        } else {
+            armingbtn.setVisibility(View.VISIBLE);
+        }
+
+        if (vehicleState.isFlying()) {
+            // Land
+            armButton.setText("LAND");
+        } else if (vehicleState.isArmed()) {
+            // Take off
+            armButton.setText("TAKE-OFF");
+        } else if (vehicleState.isConnected()) {
+            // Connected but not Armed
+            armButton.setText("ARM");
+        }
+    }
+
+    public void onArmButtonTap() {
+        State vehicleState = this.drone.getAttribute(AttributeType.STATE);
+
+        if (vehicleState.isFlying()) {
+            // Land
+            VehicleApi.getApi(this.drone).setVehicleMode(VehicleMode.COPTER_LAND, new SimpleCommandListener() {
+                @Override
+                public void onError(int executionError) {
+                    alertUser("Unable to land the vehicle.");
+                }
+
+                @Override
+                public void onTimeout() {
+                    alertUser("Unable to land the vehicle.");
+                }
+            });
+        } else if (vehicleState.isArmed()) {
+            // Take off
+            ControlApi.getApi(this.drone).takeoff(10, new AbstractCommandListener() {
+
+                @Override
+                public void onSuccess() {
+                    alertUser("Taking off...");
+                }
+
+                @Override
+                public void onError(int i) {
+                    alertUser("Unable to take off.");
+                }
+
+                @Override
+                public void onTimeout() {
+                    alertUser("Unable to take off.");
+                }
+            });
+        } else if (!vehicleState.isConnected()) {
+            // Connect
+            alertUser("Connect to a drone first");
+        } else {
+            // Connected but not Armed
+            VehicleApi.getApi(this.drone).arm(true, false, new SimpleCommandListener() {
+                @Override
+                public void onError(int executionError) {
+                    alertUser("Unable to arm vehicle.");
+                }
+
+                @Override
+                public void onTimeout() {
+                    alertUser("Arming operation timed out.");
+                }
+            });
+        }
     }
 }

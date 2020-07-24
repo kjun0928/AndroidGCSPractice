@@ -136,6 +136,23 @@
             android:textColor="@android:color/background_light" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/connectmenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/btnConnect"
+        app:layout_constraintEnd_toStartOf="@+id/menu">
+
+        <Button
+            android:id="@+id/btnarm"
+            android:layout_width="120dp"
+            android:layout_height="40dp"
+            android:onClick="btn_event"
+            android:text="arm"
+            app:layout_constraintBottom_toTopOf="@+id/btnConnect"
+            app:layout_constraintEnd_toStartOf="@+id/menu" />
+    </LinearLayout>
     <Button
         android:id="@+id/btnConnect"
         android:layout_width="120dp"
@@ -154,5 +171,7 @@
         android:spinnerMode="dropdown"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/MapLayouts" />
+
+
 
 </android.support.constraint.ConstraintLayout>
