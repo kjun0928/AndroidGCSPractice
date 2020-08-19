@@ -11,8 +11,8 @@
         android:name="com.naver.maps.map.MapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="-25dp" />
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="-128dp" />
 
     <LinearLayout
         android:id="@+id/menu"
@@ -68,6 +68,7 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="0dp"
         android:layout_height="25dp"
         android:background="#80000000"
@@ -96,8 +97,8 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true"
             android:layout_toLeftOf="@+id/btnConnect"
-            android:textColor="@android:color/background_light"
-            android:spinnerMode="dropdown" />
+            android:spinnerMode="dropdown"
+            android:textColor="@android:color/background_light" />
 
         <TextView
             android:id="@+id/altitudeValueTextView"
@@ -153,6 +154,7 @@
             app:layout_constraintBottom_toTopOf="@+id/btnConnect"
             app:layout_constraintEnd_toStartOf="@+id/menu" />
     </LinearLayout>
+
     <Button
         android:id="@+id/btnConnect"
         android:layout_width="120dp"
@@ -172,6 +174,76 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/MapLayouts" />
 
+    <LinearLayout
+        android:id="@+id/Altimenu"
+        android:layout_width="130dp"
+        android:layout_height="80dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnTakeoffAltitude">
 
+        <Button
+            android:id="@+id/btnTakeoffAltitudeUp"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="이륙고도+0.5m" />
+
+        <Button
+            android:id="@+id/btnTakeoffAltitudeDown"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="이륙고도-0.5m" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnTakeoffAltitude"
+        android:layout_width="130dp"
+        android:layout_height="40dp"
+        android:onClick="AltitudeSet"
+        android:text="고도설정"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
+
+    <LinearLayout
+        android:id="@+id/maplocklayer"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/maplockbtn"
+        app:layout_constraintEnd_toStartOf="@+id/selectConnectionType">
+
+        <Button
+            android:id="@+id/maplock"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="btn_event"
+            android:text="맵 잠금" />
+
+        <Button
+            android:id="@+id/mapmove"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="btn_event"
+            android:text="맵 이동" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/maplockbtn"
+        android:layout_width="80dp"
+        android:layout_height="45dp"
+        android:layout_weight="1"
+        android:onClick="btn_event"
+        android:text="맵 잠금"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/selectConnectionType" />
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="225dp"
+        android:layout_height="98dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
 
 </android.support.constraint.ConstraintLayout>
