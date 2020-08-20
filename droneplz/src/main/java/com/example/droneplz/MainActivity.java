@@ -31,9 +31,11 @@ import com.naver.maps.map.MapFragment;
 import com.naver.maps.map.NaverMap;
 import com.naver.maps.map.OnMapReadyCallback;
 
+import com.naver.maps.map.overlay.LocationOverlay;
 import com.naver.maps.map.overlay.Marker;
 import com.naver.maps.map.overlay.Overlay;
 import com.naver.maps.map.overlay.OverlayImage;
+import com.naver.maps.map.overlay.PathOverlay;
 import com.naver.maps.map.overlay.PolygonOverlay;
 import com.o3dr.android.client.ControlTower;
 import com.o3dr.android.client.Drone;
@@ -86,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean connectDrone = false;
     private boolean maplock = false;
     private boolean mapfollow = true;
+    private LocationOverlay locationOverlay;
 
 
     private static final int DEFAULT_UDP_PORT = 14550;
@@ -106,6 +109,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     List<LatLng> coords = new ArrayList<>();
     PolygonOverlay polygon = new PolygonOverlay();
     Marker marker = new Marker();
+    private ArrayList<LatLng> pathcoords = new ArrayList<>();
+    private PathOverlay dronepath;
 
     // 버튼들 선언
     private Button btnTakeoffAltitude;
@@ -258,18 +263,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(@NonNull NaverMap naverMap) {
         myMap = naverMap;
 
+
         myMap.setOnMapLongClickListener(new NaverMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(@NonNull PointF pointF, @NonNull LatLng latLng) {
                 State vehicleState = drone.getAttribute(AttributeType.STATE);
-                marker.setPosition(latLng);
-                marker.setMap(myMap);
-                latLong = new LatLong(latLng.latitude, latLng.longitude);
-                guideMode.startGuideMode(drone,latLong);
-/*
+
                 if (vehicleState.isFlying()) {
+//GuideMode class에서 mMarker를 불러올려 했는데 private일때
+//                    marker.setPosition(latLng);
+//                    marker.setMap(myMap);
+//                    latLong = new LatLong(latLng.latitude, latLng.longitude);
+//                    guideMode.startGuideMode(drone, latLong);
+//
+                    guideMode.mMarkerGuide.setPosition(latLng);
+                    guideMode.mMarkerGuide.setMap(myMap);
+                    latLong = new LatLong(latLng.latitude, latLng.longitude);
+                    guideMode.startGuideMode(drone, latLong);
                 }
-*/
             }
         });
     }
@@ -336,13 +347,44 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
 
             case AttributeEvent.GPS_POSITION:
-                updateGPS();                                        //드론위치 업데이트
+                updateDroneGPS();                                        //드론위치 업데이트
+                updatetrack();
+                pathline();
                 break;
 
             default:
                 // Log.i("DRONE_EVENT", event); //Uncomment to see events from the drone
                 break;
         }
+    }
+
+    protected void updatetrack() {
+        try {
+
+            Gps dronegps = this.drone.getAttribute(AttributeType.GPS);
+            LatLng droneposition = new LatLng(dronegps.getPosition().getLatitude(), dronegps.getPosition().getLongitude());
+
+            Log.d("GPSERROR1", "" + droneposition.latitude);
+            this.locationOverlay = myMap.getLocationOverlay();
+            locationOverlay.setVisible(true);
+            locationOverlay.setIcon(OverlayImage.fromResource(R.drawable.gcsmarker));
+            locationOverlay.setPosition(droneposition);
+            if (mapfollow)
+                myMap.moveCamera(CameraUpdate.scrollTo(droneposition));
+        } catch (NullPointerException e) {
+            Log.d("GPSERROR", "GPS POSITION NULL");
+            // locationOverlay = myMap.getLocationOverlay();
+            this.locationOverlay = myMap.getLocationOverlay();
+            locationOverlay.setVisible(true);
+            locationOverlay.setIcon(OverlayImage.fromResource(R.drawable.gcsmarker));
+            //locationOverlay.setAnchor(new PointF((float)0.5,(float)0.5));
+            locationOverlay.setPosition(new LatLng(35.945378, 126.682110));
+            if (mapfollow)
+                myMap.moveCamera(CameraUpdate.scrollTo(new LatLng(35.945378, 126.682110)));
+
+        }
+        //
+        //mymap.setLocationTrackingMode(LocationTrackingMode.Follow);
     }
 
 
@@ -362,7 +404,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    protected void updateGPS() {
+    protected void updateDroneGPS() {
         Gps droneLocation = this.drone.getAttribute(AttributeType.GPS);
         marker.setPosition(new LatLng(droneLocation.getPosition().getLatitude(), droneLocation.getPosition().getLongitude()));
         marker.setMap(myMap);
@@ -370,7 +412,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         marker.setAnchor(new PointF((float) 0.5, (float) 0.77));
         CameraUpdate cameraUpdate = CameraUpdate.scrollTo(new LatLng(droneLocation.getPosition().getLatitude(), droneLocation.getPosition().getLongitude()));
         myMap.moveCamera(cameraUpdate);
-
+        LatLng recentLatLng = new LatLng(droneLocation.getPosition().getLatitude(),droneLocation.getPosition().getLongitude());
+        delMarker(recentLatLng);
     }
 
     public void btn_event(View v) {
@@ -468,11 +511,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             lineAltimenu.setVisibility(View.VISIBLE);
         }
     }
-
-    protected void targetAltitude() {
-
-    }
-
 
     protected void updateNumberOfSatellites() {
         TextView numberOfSatellitesTextView = (TextView) findViewById(R.id.numberofSatellitesValueTextView);
@@ -660,6 +698,50 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else {
             list.setVisibility(View.INVISIBLE);
         }
+    }
+
+    //경로선
+    public void pathline() {
+        Gps dronegps = this.drone.getAttribute(AttributeType.GPS);
+        LatLng droneposition = new LatLng(dronegps.getPosition().getLatitude(), dronegps.getPosition().getLongitude());
+        try {
+            pathcoords.add(droneposition);
+            dronepath.setCoords(pathcoords);
+
+            dronepath.setMap(myMap);
+
+            Log.d("DRONEPATH", "list size:" + pathcoords.size());
+        } catch (NullPointerException e) {
+            Log.d("DRONEPATH", "gps position list is null");
+        }
+
+
+    }
+
+    public void delMarker(LatLng recentLatLng) {
+        try {
+            if (guideMode.CheckGoal(this.drone, recentLatLng)) {
+                guideMode.mMarkerGuide.setMap(null);
+                alertUser("목적지에 도착했습니다. 마커를 삭제합니다.");
+                VehicleApi.getApi(this.drone).setVehicleMode(VehicleMode.COPTER_ALT_HOLD, new AbstractCommandListener() {
+                    @Override
+                    public void onSuccess() {
+                        alertUser("mode changed");
+                    }
+
+                    @Override
+                    public void onError(int executionError) {
+                    }
+
+                    @Override
+                    public void onTimeout() {
+                    }
+                });
+            }
+        } catch (NullPointerException e) {
+            Log.d("NONMARKER", "no marker exist");
+        }
+
     }
 
 }

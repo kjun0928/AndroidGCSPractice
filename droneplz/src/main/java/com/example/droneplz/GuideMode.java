@@ -17,8 +17,8 @@ import com.o3dr.services.android.lib.model.AbstractCommandListener;
 
 
 public class GuideMode {
-    private LatLng mGuideModePoint; //가이드 목적지 저장
-    private Marker mMarkerGuide = new com.naver.maps.map.overlay.Marker(); //GCS 위치표시 마커 옵션
+    LatLng mGuideModePoint; //가이드 목적지 저장
+    Marker mMarkerGuide = new com.naver.maps.map.overlay.Marker(); //GCS 위치표시 마커 옵션
     private OverlayImage guideIcon = OverlayImage.fromResource(R.drawable.marker_guide);
     private MainActivity mainActivity;
 
@@ -64,4 +64,5 @@ public class GuideMode {
         LatLng target = new LatLng(guidedState.getCoordinate().getLatitude(), guidedState.getCoordinate().getLongitude());
         return target.distanceTo(recentLatLng) <= 1;
     }
+
 }
